@@ -211,7 +211,7 @@ h1 {
 
 @keyframes glow {
   0% { box-shadow: 0 0 10px #48cae4; }
-  100% { box-shadow: 0 0 25px #0096c7; }
+  100% { box-shadow: 0 0 25cm #0096c7; }
 }
 
 @keyframes pulse {
