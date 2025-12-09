@@ -1,62 +1,45 @@
+# JavaScript Event Loop
+1. JavaScript executes on a single main thread (the JS engine).  
+2. Synchronous code runs on the call stack and executes immediately.  
+3. Asynchronous APIs (timers, XHR/fetch, DOM events, I/O) are handled outside the JS call stack by the environment (browser or Node) and schedule callbacks to run later.  
+4. When an async operation completes, its callback is queued rather than executed immediately.  
+5. There are two important scheduling categories:
+   - Microtasks (higher priority): Promise callbacks (.then/.catch/.finally), queueMicrotask, MutationObserver, and in Node: process.nextTick (which has special behavior).
+   - Macrotasks (sometimes called "tasks"): setTimeout, setInterval, I/O callbacks, UI events, setImmediate (Node), and others.
+6. After the call stack becomes empty, the runtime runs:
+   - All pending microtasks (draining the microtask queue completely),
+   - Then rendering steps if needed (in browsers),
+   - Then one macrotask from the macrotask queue, and repeat.
+7. Therefore microtasks always run before the next macrotask; microtasks scheduled during microtask processing are processed in the same microtask drain.
+8. setTimeout(..., 0) does not run immediately — it runs as a macrotask after microtasks and other queued macrotasks. Browsers may also enforce minimum timer clamping (e.g., 4ms for nested timers).
+9. Node and browsers differ in some details (e.g., process.nextTick runs before other microtasks in Node; setImmediate and timers have different scheduling).
 
-## 1. JavaScript is Single-Threaded
-JavaScript executes one piece of code at a time using a single main thread.
-
-## 2. Synchronous Code Runs in the Call Stack
-All regular code—like variable assignments and function calls—executes immediately inside the call stack.
-
-## 3. Web APIs Enable Asynchronous Behavior
-Functions such as `setTimeout`, `fetch`, and DOM event listeners run outside the call stack through Web APIs.
-
-## 4. Async Callbacks Don’t Enter the Call Stack Directly
-Once Web APIs finish their task, the callback is placed into a queue rather than running immediately.
-
-## 5. Two Types of Queues: Microtask & Macrotask
-- **Microtask Queue:** Promise callbacks, `queueMicrotask`
-- **Macrotask Queue:** `setTimeout`, `setInterval`, DOM event callbacks
-
-## 6. Microtasks Run Before Macrotasks
-When the call stack becomes empty, **all** microtasks execute before any macrotask.
-
-## 7. Event Loop Controls Execution Order
-The event loop checks:
-- If the call stack is empty  
-- Whether microtasks need to run  
-- When to move to the next macrotask
-
-## 8. `setTimeout(..., 0)` Does Not Run Immediately
-Even with zero delay, the callback waits behind microtasks and any previous queued tasks.
-
-## 9. Promises Run Before Timeouts
-Promise resolutions are microtasks, so their callbacks run before macrotask operations such as `setTimeout`.
-
-## 10. Understanding the Event Loop Improves Real-World Coding
-It helps avoid UI freezes, reduces bugs in async code, and makes behavior predictable—important for both development and interviews.
-
----
-
-## Code
+## Example
 
 ```javascript
 console.log("Start");
 
 setTimeout(() => {
-    console.log("From Timeout");
+  console.log("From Timeout");
 }, 0);
 
 Promise.resolve().then(() => {
-    console.log("From Promise");
+  console.log("From Promise");
 });
 
 console.log("End");
+```
 
-## Output
-Start
-End
-From Promise
-From Timeout
+Output :
+```
+    Start  
+    End  
+    From Promise  
+    From Timeout
+```
 
 ## Summary
-
-JavaScript runs one operation at a time on a single thread, but it remains non-blocking because asynchronous tasks are handled by Web APIs. After all synchronous code executes, JavaScript processes microtasks such as promise callbacks, and then moves on to macrotasks like timeouts and event callbacks. The event loop manages this process, ensuring tasks move from their queues into execution in the correct order.
++ The event loop ensures that synchronous code runs first, then microtasks are drained, then macrotasks are processed. This helps prevent UI freezes, unexpected ordering bugs and makes async code predictable.
+markdown
++ Always display this snippet in chat as markdown in the language provided.
 
